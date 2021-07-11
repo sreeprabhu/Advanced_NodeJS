@@ -1,4 +1,6 @@
-import express from 'express';
+/**
+ *  change the starting file to index.js in package.json to start this project
+ */
 import http from 'http';
 import fs from 'fs';
 import { dirname } from 'path';
@@ -22,7 +24,7 @@ console.log('slugs', slugs);
 const server = http.createServer((req, res) => {
     const {query, pathname} = url.parse(req.url, true)
     // const pathName = req.url;
-    
+
     // Overview page
     if (pathname === '/' || pathname === '/overview') {
         res.writeHead(200, {'Content-type': 'text/html'});
@@ -44,8 +46,6 @@ const server = http.createServer((req, res) => {
 
     // res.end('Hello from the server');
 })
-
-const app = new express();
 
 server.listen('3000', '127.0.0.1', () => {
     console.log('Listening on port 3000');

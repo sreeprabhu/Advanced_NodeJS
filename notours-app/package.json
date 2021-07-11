@@ -1,0 +1,30 @@
+{
+  "name": "advanced_nodejs",
+  "version": "1.0.0",
+  "description": "advanced_nodejs",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sreeprabhu/Advanced_NodeJS.git"
+  },
+  "author": "Sreeprabhu PA",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sreeprabhu/Advanced_NodeJS/issues"
+  },
+  "homepage": "https://github.com/sreeprabhu/Advanced_NodeJS#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.11",
+    "slugify": "^1.5.3"
+  },
+  "nodemonConfig": {
+    "ext": "js,html"
+  }
+}
