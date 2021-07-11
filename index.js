@@ -22,10 +22,7 @@ console.log('slugs', slugs);
 const server = http.createServer((req, res) => {
     const {query, pathname} = url.parse(req.url, true)
     // const pathName = req.url;
-
-
-
-
+    
     // Overview page
     if (pathname === '/' || pathname === '/overview') {
         res.writeHead(200, {'Content-type': 'text/html'});
