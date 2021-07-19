@@ -9,6 +9,25 @@ const tours = JSON.parse(
 );
 
 /**
+ * Param Middleware to check ID
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @param {*} val
+ * @returns
+ */
+export const checkID = (req, res, next, val) => {
+  console.log(`Param Middleware: Current Id is ${val}`);
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID!',
+    });
+  }
+  next();
+};
+
+/**
  * Route Handlers - All Tours
  * @param {*} req
  * @param {*} res
@@ -28,13 +47,6 @@ export const getTour = (req, res) => {
   const { id } = req.params;
 
   const tour = tours.find((tour) => tour.id === id * 1);
-
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid Id!',
-    });
-  }
 
   res.status(200).json({
     status: 'success',
@@ -66,13 +78,6 @@ export const createTour = (req, res) => {
 
 export const updateTour = (req, res) => {
   const { id } = req.params;
-
-  if (id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID!',
-    });
-  }
 
   res.status(200).json({
     status: 'success',
