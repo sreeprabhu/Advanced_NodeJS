@@ -8,8 +8,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 
-const PORT = 3000;
-
 export const app = express();
 
 /**
@@ -21,7 +19,9 @@ app.use(express.json());
 /**
  * HTTP Request Logger Middleware
  */
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 /**
  * Static Middleware

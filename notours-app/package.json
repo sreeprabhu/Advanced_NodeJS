@@ -4,7 +4,8 @@
   "description": "advanced_nodejs",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start:dev": "nodemon server.js",
+    "start:prod": "SET NODE_ENV=production & nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
@@ -20,6 +21,7 @@
   "homepage": "https://github.com/sreeprabhu/Advanced_NodeJS#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.11",
