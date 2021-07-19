@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import morgan from 'morgan';
 
 const PORT = 3000;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -14,13 +15,35 @@ const app = express();
  */
 app.use(express.json());
 
+/**
+ * HTTP Request Logger Middleware
+ */
+app.use(morgan('dev'));
+
+/**
+ * Custom Middleware
+ * Middlewares in the middleware stack will apply to each and every single request
+ */
+
+app.use((req, res, next) => {
+  console.log('Hello from the middleware!');
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+/**
+ * Route Handlers - All Tours
+ * @param {*} req
+ * @param {*} res
+ */
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
+    requestedAt: req.requestTime, // the time set from the custom middleware
     results: tours.length,
     data: {
       tours: tours,
@@ -108,6 +131,10 @@ const deleteTour = (req, res) => {
 // app.post('/api/v1/tours', createTour);
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
+
+/**
+ * Routes: Middlewares which executes specific functions only for a matched url
+ */
 
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
