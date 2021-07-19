@@ -1,5 +1,10 @@
 import express from 'express';
 import morgan from 'morgan';
+import fs from 'fs';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 
@@ -17,6 +22,15 @@ app.use(express.json());
  * HTTP Request Logger Middleware
  */
 app.use(morgan('dev'));
+
+/**
+ * Static Middleware
+ * Helps to serve the static files from the file system
+ * All the files inside the public folder can be accessed from the browser
+ * The static files will be mapped to the project route folder and can be directly accessed.
+ * eg: localhost:3000/overview.html / localhost:3000/img/pin.png
+ */
+app.use(express.static(`${__dirname}/public`));
 
 /**
  * Custom Middleware

@@ -28,6 +28,25 @@ export const checkID = (req, res, next, val) => {
 };
 
 /**
+ * CheckBody Middleware
+ * Check if body contains the name and price property
+ * if not, send a 404 (bad request)
+ * Used in post handler
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+export const checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or price!',
+    });
+  }
+  next();
+};
+
+/**
  * Route Handlers - All Tours
  * @param {*} req
  * @param {*} res
