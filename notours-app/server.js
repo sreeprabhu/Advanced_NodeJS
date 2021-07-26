@@ -4,9 +4,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-import { app } from './app.js';
-
 dotenv.config({ path: './config.env' });
+import { app } from './app.js';
 
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
@@ -24,8 +23,8 @@ mongoose
 
 const PORT = process.env.PORT || 3000;
 
-console.log('ENV', app.get('env'));
-// console.log('ENV', process.env); // SET NODE_ENV=development
+// console.log('ENV', app.get('env'));
+console.log('ENV', process.env.NODE_ENV); // SET NODE_ENV=development
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);

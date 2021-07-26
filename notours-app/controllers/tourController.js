@@ -56,7 +56,43 @@ export const checkBody = (req, res, next) => {
  */
 export const getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    // Build Query
+
+    // 1) Filtering
+
+    // const { duration, difficulty } = req.query;
+    const queryObj = { ...req.query };
+    const excludeFields = ['page', 'sort', 'limit', 'fields'];
+    excludeFields.forEach((field) => delete queryObj[field]);
+
+    // const tours = await Tour.find(queryObj);
+
+    // This is another method
+
+    // const tours = await Tour.find()
+    //   .where('duration')
+    //   .equals(duration)
+    //   .where('difficulty')
+    //   .equals(difficulty);
+
+    // We are making the above method a query which executes at a later point
+
+    // 2) Advanced Filtering
+
+    // { difficulty: 'easy , duration: { $gte: 5 } }
+    // gte, gt, lte, lt
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b{gte|gt|lte|lt}\b/g, (match) => `$${match}`); // replaces the above 4 words with a $ sign in front of them
+
+    console.log('queryStr', queryStr);
+
+    const query = Tour.find(JSON.parse(queryStr));
+
+    // Execute Query
+
+    const tours = await query;
+
     res.status(200).json({
       status: 'success',
       requestedAt: req.requestTime, // the time set from the custom middleware
