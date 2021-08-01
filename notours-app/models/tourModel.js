@@ -58,6 +58,10 @@ const tourSchema = new mongoose.Schema(
       select: false, // permanently hides this field from the output
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -74,7 +78,7 @@ tourSchema.virtual('durationWeeks').get(function () {
 });
 
 /**
- * Mongoose Pre Hook/ Middleware
+ * Mongoose Document Middleware - Pre Hook/ Middleware
  * Runs before an actual event, ie.., before a document is saved in to the db
  * Runs before .save() and .create(), but not on insertMany()
  */
@@ -88,6 +92,26 @@ tourSchema.pre('save', function (next) {
  * Runs after a doc is saved
  */
 tourSchema.post('save', function (doc, next) {
+  next();
+});
+
+/**
+ * Mongoose Query Middleware - Pre Hook
+ * Runs before execution of a query
+ * Wont execute for findOne() unless we use regular expression
+ */
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } }); // executed before the find query is executed in the controller
+
+  this.start = Date.now();
+  next();
+});
+
+/**
+ * Mongoose Query Middleware - Post Hook
+ */
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`);
   next();
 });
 
