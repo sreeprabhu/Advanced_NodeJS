@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
 
 const tourSchema = new mongoose.Schema(
   {
@@ -7,6 +8,7 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a name'],
       unique: true,
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration'],
@@ -69,6 +71,24 @@ const tourSchema = new mongoose.Schema(
  */
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+
+/**
+ * Mongoose Pre Hook/ Middleware
+ * Runs before an actual event, ie.., before a document is saved in to the db
+ * Runs before .save() and .create(), but not on insertMany()
+ */
+tourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+/**
+ * Mongoose Post Hook
+ * Runs after a doc is saved
+ */
+tourSchema.post('save', function (doc, next) {
+  next();
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
