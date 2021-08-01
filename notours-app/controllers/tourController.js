@@ -3,6 +3,7 @@ import fs from 'fs';
 // import { fileURLToPath } from 'url';
 
 import Tour from '../models/tourModel.js';
+import APIFeatures from '../utils/apiFeatures.js';
 
 // const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -50,7 +51,17 @@ export const checkBody = (req, res, next) => {
 };
 
 /**
- * Route Handlers - All Tours
+ * Alias Middleware
+ */
+export const aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
+/**
+ * Route Handlers - Get All Tours with Filters, Pagination, Field Limiting and Sort
  * @param {*} req
  * @param {*} res
  */
@@ -58,40 +69,25 @@ export const getAllTours = async (req, res) => {
   try {
     // Build Query
 
-    // 1) Filtering
+    // 1A) Filtering
 
-    // const { duration, difficulty } = req.query;
-    const queryObj = { ...req.query };
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    excludeFields.forEach((field) => delete queryObj[field]);
+    // 2) Sorting
 
-    // const tours = await Tour.find(queryObj);
+    // 3) Field Limiting
 
-    // This is another method
-
-    // const tours = await Tour.find()
-    //   .where('duration')
-    //   .equals(duration)
-    //   .where('difficulty')
-    //   .equals(difficulty);
-
-    // We are making the above method a query which executes at a later point
-
-    // 2) Advanced Filtering
-
-    // { difficulty: 'easy , duration: { $gte: 5 } }
-    // gte, gt, lte, lt
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b{gte|gt|lte|lt}\b/g, (match) => `$${match}`); // replaces the above 4 words with a $ sign in front of them
-
-    console.log('queryStr', queryStr);
-
-    const query = Tour.find(JSON.parse(queryStr));
+    // 4) Pagination
 
     // Execute Query
 
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limit()
+      .paginate();
+    const tours = await features.query;
+    // const tours = await query;
+
+    // query.sort().select().skip().limit()
 
     res.status(200).json({
       status: 'success',
@@ -202,6 +198,114 @@ export const deleteTour = async (req, res) => {
       // status: No Content
       status: 'success',
       data: null,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+/**
+ * Aggragate Middleware with Group
+ */
+
+export const getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          // _id: null,
+          // _id: '$difficulty',
+          _id: { $toUpper: '$difficulty' }, // group by field
+          numTours: { $sum: 1 }, // for each of the document that goes through this pipeline, 1 will be added to the counter
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: { avgPrice: 1 }, // need to use the grouped fields (-1 for descenting)
+      },
+      {
+        $match: {
+          _id: { $ne: 'EASY' }, // filter values
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+/**
+ * Aggragate Middleware with UnWind
+ */
+export const getMonthlyPlan = async (req, res) => {
+  try {
+    const year = req.params.year * 1; // 2021
+
+    /**
+     * unwind aggregate function
+     * deconstruct an array field from an input document and then give one document
+     * for each array element
+     */
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          }, // filter values
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $month: '$startDates',
+          },
+          numTourStarts: { $sum: 1 }, // tours starting in each months
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: { month: '$_id' },
+      },
+      {
+        $project: { _id: 0 }, // the ones with 0 won't show up in the response
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+      {
+        $limit: 12,
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        plan,
+      },
     });
   } catch (err) {
     res.status(400).json({

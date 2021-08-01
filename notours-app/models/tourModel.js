@@ -52,8 +52,17 @@ const tourSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+    select: false, // permanently hides this field from the output
   },
   startDates: [Date],
+});
+
+/**
+ * Virtual Property
+ * Created each time when we get data from db
+ */
+tourSchema.virtual('durationWeeks').get(function () {
+  return this.duration / 7;
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
