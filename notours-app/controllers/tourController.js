@@ -4,6 +4,7 @@ import fs from 'fs';
 
 import Tour from '../models/tourModel.js';
 import APIFeatures from '../utils/apiFeatures.js';
+import catchAsync from '../utils/catchAsync.js';
 
 // const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -127,7 +128,18 @@ export const getTour = async (req, res) => {
   }
 };
 
-export const createTour = async (req, res) => {
+export const createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: newTour,
+    },
+  });
+});
+
+export const createTourWithoutAsynErrorHandling = async (req, res, next) => {
   try {
     // const newTour = new Tour({});
     // newTour.save();

@@ -8,6 +8,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 
+import AppError from './utils/AppError.js';
+import globalErrorHandler from './controllers/errorController.js';
+
 export const app = express();
 
 /**
@@ -65,3 +68,21 @@ app.use('/api/v1/users', userRouter);
 
 // userRouter.route('/').get(getAllUsers).post(createUser);
 // userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+
+app.use('*', (req, res, next) => {
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `can't find ${req.originalUrl} on this server`,
+  // });
+
+  // const err = new Error(`can't find ${req.originalUrl} on this server!`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+
+  next(new AppError(`can't find ${req.originalUrl} on this server!`, 404)); // will call the error handling middleware, if there is an argument in next()
+});
+
+/**
+ * Error Hanlding Middleware
+ */
+app.use(globalErrorHandler);

@@ -115,6 +115,18 @@ tourSchema.post(/^find/, function (docs, next) {
   next();
 });
 
+/**
+ * Mongoose Aggregation Middleware - Pre Hook
+ * Runs before execution of a aggregation
+ */
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({
+    $match: { secretTour: { $ne: true } },
+  });
+  console.log('aggregation pipeline', this.pipeline());
+  next();
+});
+
 const Tour = mongoose.model('Tour', tourSchema);
 
 export default Tour;
