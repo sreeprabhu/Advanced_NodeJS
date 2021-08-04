@@ -7,6 +7,7 @@ import {
   deleteUser,
   checkID,
 } from '../controllers/userController.js';
+import { signUp } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -15,6 +16,8 @@ const router = express.Router();
  * Can Access the request parameters
  */
 router.param('id', checkID);
+
+router.post('/signup', signUp);
 
 router.route('/').get(getAllUsers).post(createUser);
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
